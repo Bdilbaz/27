@@ -289,7 +289,7 @@
     <div id="bookingModal" class="modal">
         <div class="modal-content">
             <h2>Termin buchen</h2>
-            <form id="bookingForm">
+            <form id="bookingForm" action="send_email.php" method="POST">
                 <div class="form-group">
                     <label for="title">Titel</label>
                     <input type="text" id="title" required>
@@ -299,6 +299,11 @@
                     <input type="text" id="name" required>
                 </div>
                 <div class="form-group">
+                    <label for="email">E-Mail</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                 <div class="form-group">
                     <label for="department">Abteilung</label>
                     <input type="text" id="department" required>
                 </div>
@@ -524,7 +529,8 @@
             const type = document.getElementById('type').value;
             const startTime = document.getElementById('startTime').value;
             const endTime = document.getElementById('endTime').value;
-
+            const email = document.getElementById('email').value
+            
             if (selectedCell) {
                 const bookingData = {
                     title,
@@ -533,12 +539,27 @@
                     type,
                     startTime,
                     endTime,
+                    email,
                     room: document.getElementById('roomSelect').value,
                     day: selectedCell.dataset.day,
                     bookedDate: new Date().toISOString()
                 };
 
                 saveBooking(bookingData);
+
+                const formData = new FormData(bookingForm);
+                fetch('send_email.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Buchung erfolgreich und E-Mail gesendet!');
+                    } else {
+                        alert('Fehler beim Senden der E-Mail.');
+                    }
+                }).catch(error => {
+                    alert('Es gab ein Problem: ' + error.message);
+                });
 
                 const timeSlots = getTimeSlots(startTime, endTime);
                 timeSlots.forEach(slot => {
